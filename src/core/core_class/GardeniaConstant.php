@@ -11,4 +11,6 @@ class GardeniaConstant
 {
     //Gardenia官方的命名前缀
     const GARDENIA_PREFIX = 'gardenia_';
+    //超级管理
+    const GROUP_TYPE_SUPER_ADMIN = 0;
 }

@@ -6,7 +6,6 @@
 
 namespace gardenia_admin\src\core\core_class;
 
-use app\admin\extend\diy\extra_class\AppConstant;
 use gardenia_admin\src\core\core_class\GardeniaConstant;
 use think\Exception;
 use think\facade\Db;
@@ -82,7 +81,7 @@ class GardeniaList
             }
         }
         if ($ruleName) {
-            if ($request->user['admin_type'] !== AppConstant::GROUP_TYPE_SUPER_ADMIN){
+            if ($request->user['admin_type'] !== GardeniaConstant::GROUP_TYPE_SUPER_ADMIN){
                 if (!in_array($ruleName,$request->user['access_list'])){
                     $attrList['style'] = 'display: none';
                 }
@@ -176,14 +175,7 @@ class GardeniaList
         $this->deleteTip = $tip;
         return $this;
     }
-//    protected function getMenuList($level = 1) {
-//        //查询出所有的菜单
-//        $rules = Db::name('auth_rule')->where([
-//            'type' => AppConstant::RULE_TYPE_MENU,
-//            'level' => 1
-//        ])->select()->toArray();
-//        return $rules;
-//    }
+
     public function view($templatePath = '',$var = []) {
         $templatePath = $templatePath ? $templatePath : app_path().config('view.view_dir_name')
             .'/'.config('route.default_controller').'/'.config('route.default_action').

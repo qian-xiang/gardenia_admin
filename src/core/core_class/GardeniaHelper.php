@@ -7,8 +7,6 @@
 namespace gardenia_admin\src\core\core_class;
 
 
-use app\admin\extend\diy\extra_class\AppConstant;
-
 class GardeniaHelper
 {
     static public function layPaginate($data) {
