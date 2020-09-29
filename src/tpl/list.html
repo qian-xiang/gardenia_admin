@@ -1,0 +1,178 @@
+<div style="width: 100%;">
+<!--    <h3 style="margin-bottom: 1rem;">用户列表</h3>-->
+    {if $operateTopButtonList}
+        <div class="operate-btn-group">
+            {volist name="operateTopButtonList" id="item"}
+                {if $item['type'] === 'gardenia'}
+                    {switch $item['btnType']}
+                        {case create }
+                            <button id="{$item.attrList.id}" class="layui-btn layui-btn-warm layui-bg-blue layui-btn-sm" onclick="location.href = 'https://www.baidu.com';">{$item.title}</button>
+                        {/case}
+                        {case delete}
+                            <button id="{$item.attrList.id}" class="layui-btn layui-btn-warm layui-bg-red layui-btn-sm">{$item.title}</button>
+                        {/case}
+                        {default /}<h1>GardeniaAdmin不支持{$item['btnType']}按钮类型</h1>
+                    {/switch}
+                    {else /}
+                        <button id="{$item.attrList.id}">{$item.title}</button>
+                {/if}
+            {/volist}
+        </div>
+    {/if}
+    <table id="data-table" lay-filter="gardeniaTable"></table>
+</div>
+
+<script>
+    layui.use(['table','jquery'], function(){
+        let $ = layui.$;
+        let table = layui.table;
+
+        let info = {:htmlspecialchars_decode(json_encode($tableAttrList,JSON_UNESCAPED_UNICODE))};
+
+        info.cols = [{:htmlspecialchars_decode(json_encode($tableHead,JSON_UNESCAPED_UNICODE))}];
+        info.elem = '#data-table';
+
+        {if $headToolbox}
+            info.toolbar = '{$headToolbox.element}';
+        {/if}
+        //第一个实例
+        table.render(info);
+
+        {if $operateTopButtonList}
+            {volist name="operateTopButtonList" key="index" id="item"}
+                {if $item['type'] === 'gardenia'}
+                    {switch $item['btnType']}
+                        {case delete}
+                            //执行点击删除按钮的逻辑
+                            $('#{$item.attrList.id}').on('click',function () {
+                                //执行删除流程
+                                //获取选中的行数
+                                let checkStatus = table.checkStatus('data-table');
+                                let deleteData = '';
+                                for (let i = 0; i < checkStatus.data.length; i++) {
+                                    deleteData = deleteData ? deleteData + ',' + checkStatus.data[i].{$primaryKey} : checkStatus.data[i].{$primaryKey};
+                                }
+                                checkStatus.data = null;
+
+                                layer.confirm('{$deleteTip}',function (index) {
+                                    //已确认
+                                    layer.close(index);
+                                    $.ajax({
+                                        url: "{:url('/'.request()->controller().'/delete')}?id=" + deleteData,
+                                        method: 'POST',
+                                        data: {},
+                                        success: function (e) {
+                                            if (e.code) {
+                                                layer.alert(e.msg);
+                                                e.redirectUrl && (location.href = e.redirectUrl);
+                                                return ;
+                                            }
+
+                                            layer.alert('删除成功！');
+                                            e.redirectUrl ? (location.href = e.redirectUrl) : table.reload('data-table');
+                                        },
+                                        error: function (e) {
+                                            console.log(e);
+                                            layer.alert('网络异常，请求失败');
+                                        }
+                                    })
+                                })
+
+                            });
+                        {/case}
+                        {case create}
+                            //什么都不做
+                        {/case}
+                            {default /}alert('addTopOperateButton方法不支持{$item['btnType']}按钮类型');
+                    {/switch}
+                {/if}
+
+                let button_{$item.attrList.id} = $('#{$item.attrList.id}');
+                {volist name="item.attrList" id="value"}
+                    button_{$item.attrList.id}.attr('{$key}','{:htmlspecialchars_decode($value)}');
+                {/volist}
+            {/volist}
+        {/if}
+
+        let primaryKey = '{$primaryKey}';
+
+            <!--添加额外的js-->
+            {if isset($extraLayuiJS)}
+            {volist name="extraLayuiJS" id="item"}
+            {if $item['type'] === 'path'}
+                {/*:htmlspecialchars_decode(file_get_contents($item.content))*/}
+                {:view($item.content)->getContent()}
+            {else /}
+                {:htmlspecialchars_decode($item.content)}
+                {/if}
+                    {/volist}
+                        {/if}
+
+        //监听事件
+        table.on('tool(gardeniaTable)', function(obj){
+            switch(obj.event){
+                case '{:gardenia_admin\\src\\core\\core_class\\GardeniaConstant::GARDENIA_PREFIX}read':
+                    location.href = '{:url("/".request()->controller()."/read")}?id=' + obj.data[primaryKey];
+                    break;
+                case '{:gardenia_admin\\src\\core\\core_class\\GardeniaConstant::GARDENIA_PREFIX}create':
+                    layer.msg('你点击的是添加');
+                    location.href = '{:url("/".request()->controller()."/create")}?id=' + obj.data[primaryKey];
+                    break;
+                case '{:gardenia_admin\\src\\core\\core_class\\GardeniaConstant::GARDENIA_PREFIX}delete':
+                    layer.confirm('你确定要删除ID：'+ obj.data[primaryKey] + '的记录么？',null,function (index) {
+                        $.ajax({
+                            url: '{:url("/".request()->controller()."/delete")}?id=' + obj.data[primaryKey],
+                            method: 'POST',
+                            dataType: 'json',
+                            data: {},
+                            success: function (res) {
+                                console.log(res);
+                                if (res.code !== 0){
+                                    return layer.msg('删除失败，错误信息：' + res.msg);
+                                }
+                                layer.msg('删除成功！');
+                                if (res.redirectUrl){
+                                    location.href = res.redirectUrl;
+                                }
+                            }
+                        })
+                        layer.close(index);
+                    });
+                    break;
+                case '{:gardenia_admin\\src\\core\\core_class\\GardeniaConstant::GARDENIA_PREFIX}edit':
+                    //当前操作列
+                    let currentOperateColumn = 'operate';
+                    // let url = $(obj.tr.selector + ' > td[data-field="'+ currentOperateColumn +'"] > div > button[lay-event="edit"]').data('redirectUrl');
+                    let url = '{:url("/".request()->controller()."/edit")}';
+                    location.href = url + '?id=' + obj.data[primaryKey];
+                    break;
+            };
+        });
+    });
+</script>
+
+{if  $headToolbox}
+    {if $headToolbox.type === 'text'}
+        {:htmlspecialchars_decode($headToolbox.content)}
+    {else /}
+        <script type="text/html" id="{:strpos($headToolbox.element,'#') !== false ? mb_substr($headToolbox.element,strpos($headToolbox.element,'#') + 1) : $headToolbox.element}">
+            {:htmlspecialchars_decode(file_get_contents($headToolbox.content))}
+        </script>
+    {/if}
+{/if}
+
+{volist name="layuiTemplateList" id="item"}
+    {:htmlspecialchars_decode($item)}
+{/volist}
+
+<!--添加额外的js-->
+{if isset($extraJS)}
+    {volist name="extraJS" id="item"}
+        {if $item['type'] === 'path'}
+            <script src="{$item.content}"></script>
+        {else /}
+            {:htmlspecialchars_decode($item.content)}
+        {/if}
+    {/volist}
+{/if}
+

@@ -1,0 +1,192 @@
+{load href="/static/css/gardenia/form.css" /}
+
+<div class="root-container">
+    <form class="layui-form" name="gardeniaForm" method="{$formMethod}" action="{$formUrl}" {if !$formStatus}onsubmit = "return false"{/if}>
+
+        {volist name="data" id="item" }
+            {php}
+                $attrStr = '';
+                if (isset($item['attrList'])){
+                    foreach ($item['attrList'] as $key => $value) {
+                        $attrStr =  $attrStr ? $attrStr.' '.$key.'='.$value : $key.'='.$value;
+                    }
+                }
+            {/php}
+            {switch $item.styleType}
+
+            {case gardenia}
+                {switch $item.type}
+                    {case hidden }
+                        <div class="layui-form-item">
+                            <input type="hidden" name="{$item.field}" {$attrStr}>
+                        </div>
+                    {/case}
+                    {case text }
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">{$item.title}</label>
+                            <div class="layui-input-block">
+                                <input type="{$item.type}" name="{$item.field}" class="layui-input" {$attrStr}>
+                            </div>
+                        </div>
+                    {/case}
+                    {case number }
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">{$item.title}</label>
+                            <div class="layui-input-block">
+                                <input type="{$item.type}" name="{$item.field}" class="layui-input" {$attrStr}>
+                            </div>
+                        </div>
+                    {/case}
+                    {case password }
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">{$item.title}</label>
+                            <div class="layui-input-block">
+                                <input type="{$item.type}" name="{$item.field}" class="layui-input" {$attrStr}>
+                            </div>
+                        </div>
+                    {/case}
+
+                    {case select}
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">{$item.title}</label>
+                        <div class="layui-input-block">
+                            <select name="{$item.field}" {$attrStr}>
+                                <option value="请选择"></option>
+                                {foreach $item['option'] as $k => $val}
+                                    <option value="{$k}" {if isset($item['attrList']) && $item['attrList']['value'] === $k}selected{/if}>{$val}</option>
+                                {/foreach}
+                            </select>
+                        </div>
+                    </div>
+                    {/case}
+
+                    {case checkbox }
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">{$item.title}</label>
+                            <div class="layui-input-block">
+                                <input type="checkbox" name="like[write]" title="写作">
+                                <input type="checkbox" name="like[read]" title="阅读" checked>
+                                <input type="checkbox" name="like[dai]" title="发呆">
+                            </div>
+                        </div>
+                    {/case}
+
+                    {case switch }
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">{$item.title}</label>
+                            <div class="layui-input-block">
+                                <input type="checkbox" name="{$item.field}" lay-skin="switch" {$attrStr}>
+                            </div>
+                        </div>
+                    {/case}
+
+                    {case radio }
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">{$item.title}</label>
+                            <div class="layui-input-block">
+                                <!--                                checked-->
+                                {volist name="item.option" id="list"}
+                                    <input type="radio" name="{$item.field}" value="{$list.value}" title="$list.label}" {$attrStr}>
+                                {/volist}
+                            </div>
+                        </div>
+                    {/case}
+
+                    {case textarea }
+                        <div class="layui-form-item layui-form-text">
+                            <label class="layui-form-label">{$item.title}</label>
+                            <div class="layui-input-block">
+                                <textarea name="{$item.field}" class="layui-textarea" value="{$item.value}" {$attrStr}></textarea>
+                            </div>
+                        </div>
+                    {/case}
+
+                    {case tree}
+                        <div class="layui-form-item layui-form-text">
+                            <label class="layui-form-label">{$item.title}</label>
+                            <div class="layui-input-block">
+                                <div id="{$item.field}"></div>
+                                {php}
+                                    $treeList[] = ['elem'=> $item['field'],'id'=> $item['field'],'data'=> json_encode($item['option'],JSON_UNESCAPED_UNICODE)];
+                                {/php}
+
+                            </div>
+                        </div>
+                    {/case}
+                    {default /}<script>alert('addFormItem的参数type不支持{$item.type}类型')</script>
+                {/switch}
+            {/case}
+            {case normal}
+                <div class="layui-form-item layui-form-text">
+                    <label class="layui-form-label">{$item.title}</label>
+                    <div class="layui-input-block">
+                        <{$item.type} name="{$item.field}" {$attrStr}></{$item.type}>
+                    </div>
+                </div>
+            {/case}
+            {default /}<script>alert('addFormItem的参数styleType不支持{$item.styleTyp}类型')</script>
+        {/switch}
+
+    {/volist}
+    {if $btnList}
+        <div class="layui-form-item" style="margin-top: 2.5rem;">
+            <div class="layui-input-block">
+                {volist name="btnList" id="list"}
+                {if $list.type === 'submit'}
+                <button class="layui-btn" name="{$list.field}" lay-submit lay-filter="gardeniaForm">{$list.title}</button>
+                {elseif $list.type === 'reset'}
+                <button type="{$list.type}" name="{$list.field}" class="layui-btn layui-btn-primary">{$list.title}</button>
+                {elseif $list.type === 'cancel'}
+                <button type="{$list.type}" name="{$list.field}" class="layui-btn layui-btn-primary layui-bg-red" onclick="history.go(-1);return false;">{$list.title}</button>
+                {else /}
+                <button class="layui-btn layui-btn-primary" name="{$list.field}">{$list.title}</button>
+                {/if}
+                {/volist}
+            </div>
+        </div>
+    {/if}
+
+</form>
+</div>
+<script>
+    let moduleList = ['form','jquery'];
+    {if isset($treeList) && $treeList}
+        moduleList.push('tree');
+    {/if}
+    layui.use(moduleList, function(){
+        var form = layui.form;
+        var $ = layui.$;
+        {volist name="formJsArr" id="formJs"}
+            {if $formJs['type'] === 'path'}
+                {:view($formJs.content)->getContent()}
+            {else /}
+                {:htmlspecialchars_decode($formJs.content)}
+            {/if}
+        {/volist}
+
+        {if isset($treeList) && $treeList}
+            {volist name="treeList" id="item"}
+                let tree_{$item.elem} = layui.tree;
+                //渲染
+                tree_{$item.elem}.render({
+                    elem: '#{$item.elem}'
+                    ,data: {:htmlspecialchars_decode($item.data)}
+                    ,id: "{$item.id}"
+                    ,showCheckbox: true
+                });
+            {/volist}
+
+            {volist name="treeItemJsArr" id="treeItemJs"}
+                {if $treeItemJs['type'] === 'path'}
+                    {:view($treeItemJs.content)->getContent()}
+                {else /}
+                    {:htmlspecialchars_decode($treeItemJs.content)}
+                {/if}
+            {/volist}
+        {/if}
+
+            {if isset($innerJs) && $innerJs}
+                {:htmlspecialchars_decode($innerJs)}
+            {/if}
+    });
+</script>

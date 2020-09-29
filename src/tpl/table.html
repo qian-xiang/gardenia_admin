@@ -1,0 +1,59 @@
+{load href="__CSS__/list.css" /}
+{load href="__STATIC__/layui-v2.5.6/layui/css/layui.css" /}
+{load href="__STATIC__/layui-v2.5.6/layui/layui.js" /}
+<div class="root-container" style="overflow-x: scroll;display: flex;flex-direction: column;">
+        <table class="layui-table" style="flex: 1;">
+            <colgroup>
+                <col width="150">
+                <col width="200">
+                <col>
+            </colgroup>
+            <thead>
+            <tr>
+<!--                表头部分-->
+                {volist name="listHead" id="items"}
+                    <th {if isset($items.field) && $items.field} name="{$items.field}" {/if} >{$items.title}</th>
+                {/volist}
+            </tr>
+            </thead>
+            <tbody>
+            {volist  name="data" id="dataItem"}
+                <tr>
+                    {volist name="listHead" id="item" }
+                        <td name="{$item.field}">
+<!--                            如果当前字段是操作按钮组字段（即非数据字段），则显示操作按钮组，否则直接显示数据-->
+                                {if in_array($item.field,$operateFieldList) === true}
+                                    <div class="">
+                                        {volist name="dataItem[$item.field]['btn_group']" id="items"}
+                                            {if $items.btn_type === 'edit'}
+                                                <button class="layui-btn" lay-submit lay-filter="formDemo">{$items.title}</button>
+                                            {elseif $items.btn_type === 'delete'}
+                                                <button class="layui-btn layui-bg-red" lay-submit lay-filter="formDemo">{$items.title}</button>
+                                            {elseif $items.btn_type === 'read'}
+                                                <button class="layui-btn" lay-submit lay-filter="formDemo">{$items.title}</button>
+                                            {elseif $items.btn_type === 'resume'}
+                                                <button class="layui-btn layui-bg-blue" lay-submit lay-filter="formDemo">
+                                                    {php}
+                                                        $statusList = $dataItem[$item['field']]['status_info']['status_list'];
+                                                        $statusField = $dataItem[$item['field']]['status_info']['status_field'];
+                                                        $key = array_search($dataItem[$statusField],$statusList);
+                                                        unset($statusList[$key]);
+                                                        $statusList = array_values($statusList);
+                                                        echo $statusList[0];
+                                                    {/php}
+                                                </button>
+                                            {else /} 暂不支持这种按钮类型
+                                            {/if}
+                                        {/volist}
+                                    </div>
+
+                                {else /} {$dataItem[$item.field]}
+                                {/if}
+                        </td>
+                    {/volist}
+                </tr>
+            {/volist}
+
+            </tbody>
+        </table>
+</div>

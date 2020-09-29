@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>{:config('app.app_name')}</title>
+    <link rel="stylesheet" href="__STATIC__/layui-v2.5.6/layui/css/layui.css">
+    <script src="__STATIC__/layui-v2.5.6/layui/layui.js"></script>
+    <style>
+        .layui-body {
+            overflow-x: scroll;
+            padding: 1rem;
+        }
+        .layui-table-cell {
+            height: 100%;
+        }
+        /*.layui-table-tool {*/
+        /*    background-color: white;*/
+        /*    border: none;*/
+        /*}*/
+    </style>
+</head>
+<body>
+
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        <div class="layui-logo">{:config('app.app_name')}</div>
+        <!-- 头部区域（可配合layui已有的水平导航） -->
+<!--        <ul class="layui-nav layui-layout-left">-->
+<!--            <li class="layui-nav-item"><a href="">控制台</a></li>-->
+<!--            <li class="layui-nav-item"><a href="">商品管理</a></li>-->
+<!--            <li class="layui-nav-item"><a href="">用户</a></li>-->
+<!--            <li class="layui-nav-item">-->
+<!--                <a href="javascript:;">其它系统</a>-->
+<!--                <dl class="layui-nav-child">-->
+<!--                    <dd><a href="">邮件管理</a></dd>-->
+<!--                    <dd><a href="">消息管理</a></dd>-->
+<!--                    <dd><a href="">授权管理</a></dd>-->
+<!--                </dl>-->
+<!--            </li>-->
+<!--        </ul>-->
+        <ul class="layui-nav layui-layout-right" lay-filter="user">
+            <li class="layui-nav-item">
+                <a href="javascript:;">
+<!--                    <img src="http://t.cn/RCzsdCq" class="layui-nav-img">-->
+                    {:request()->user['username']}
+                </a>
+<!--                <dl class="layui-nav-child">-->
+<!--                    <dd><a href="">基本资料</a></dd>-->
+<!--                    <dd><a href="">安全设置</a></dd>-->
+<!--                </dl>-->
+            </li>
+            <li class="layui-nav-item">
+                <a href="javascript:;" id="logout">
+                    退出
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+            <dl class="layui-nav layui-nav-tree"  lay-filter="sideNavClick">
+
+            </dl>
+        </div>
+    </div>
+
+    <div class="layui-body">
+        <!-- 内容主体区域 -->
+        {:htmlspecialchars_decode($templateContent)}
+
+<!--        <div style="padding: 15px;">内容主体区域</div>-->
+    </div>
+
+    <div class="layui-footer">
+        <!-- 底部固定区域 -->
+        © {:config('app.app_name')}
+<!--        © layui.com-->
+    </div>
+</div>
+<script>
+    layui.use(['element','jquery','layer'], function(){
+        var element = layui.element;
+        let $ = layui.jquery;
+        let data = {:htmlspecialchars_decode(json_encode($asideMenuList,JSON_UNESCAPED_UNICODE))};
+        renderNavTree(data,$('.layui-nav-tree'));
+        let c = $('.layui-nav-itemed');
+        let parentNode = c.parent('dl').parent('dd');
+        if(parentNode.length){
+            parentNode.addClass('layui-nav-itemed');
+            // c.removeClass('layui-nav-itemed');
+        }
+        element.on('nav(user)',function (elem) {
+            if ($(elem).attr('id') === 'logout') {
+                layer.confirm('你确定要注销登录么？',null,function (index) {
+                    layer.close(index);
+                    location.href = "{:url('/Login/logout')}?t=" + (new Date()).getTime();
+                });
+            }
+        })
+        $(document).on('click','.sideNav',function (e) {
+            e.stopPropagation();
+            if (!$(e.target).children('.layui-nav-more').length){
+                $(e.target).data('href') && (location.href = $(e.target).data('href'));
+            }else {
+                if ($(e.target).parent('dd.layui-nav-item').hasClass('layui-nav-itemed')){
+                    $(e.target).parent('dd.layui-nav-item').removeClass('layui-nav-itemed');
+                }else {
+                    $(e.target).parent('dd.layui-nav-item').addClass('layui-nav-itemed');
+                }
+            }
+
+        });
+
+
+
+        function renderNavTree(json, parent) {
+            for (let i in json) {
+
+                let className = "layui-nav-item sideNav";
+                let dd = $('<dd class="'+ className +'"></dd>');
+                let menuUrl = '/{:app(\'http\')->getName()}.php' + json[i].field;
+                if (json[i].active) {
+                    dd.addClass('layui-nav-itemed');
+                }
+
+                //如果检测有子节点，则进行遍历
+                if (json[i].children && json[i].children.length > 0) {
+                    // json[i].active && dd.addClass('layui-nav-itemed');
+                    $(dd).append('<a href="javascript: void(0);" data-href="'+menuUrl+'">'+json[i].title+'<span class="layui-nav-more"></span></a>');
+                    $(dd).append('<dl class="layui-nav-child sideNav"></dl>').appendTo(parent);
+                    renderNavTree(json[i].children, $(dd).children().eq(1));
+                }
+
+                else {
+                    $(dd).append('<a href="javascript: void(0);" data-href="'+menuUrl+'">'+json[i].title+'</a>').appendTo(parent);
+                }
+            }
+        }
+
+
+    });
+
+</script>
+</body>
+</html>
