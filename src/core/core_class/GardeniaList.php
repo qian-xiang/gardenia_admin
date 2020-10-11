@@ -250,9 +250,10 @@ class GardeniaList
             'colOperateBtnList' => $this->colOperateBtnList,
             'layuiTemplateList' => $this->layuiTemplateList,
         ];
+
         $mainArray = [
             'display_type'=> 'list',
-            'templateContent'=> view('../vendor/gardenia_admin/src/tpl/list.html',$subArray)->getContent(),
+            'templateContent'=> view(dirname(__FILE__).'/../../tpl/list.html',$subArray)->getContent(),
         ];
         view(dirname(__FILE__).'/../../tpl/index.html',$mainArray)->send();
     }

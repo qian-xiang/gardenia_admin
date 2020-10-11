@@ -169,7 +169,7 @@ class GardeniaForm
 
         $mainArray = [
             'display_type'=> 'form',
-            'templateContent'=> view('../vendor/gardenia_admin/src/tpl/form.html',$subArray)->getContent(),
+            'templateContent'=> view(dirname(__FILE__).'/../../tpl/form.html',$subArray)->getContent(),
         ];
 
         return view(dirname(__FILE__).'/../../tpl/index.html',$mainArray)->send();
