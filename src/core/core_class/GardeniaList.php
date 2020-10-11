@@ -33,6 +33,10 @@ class GardeniaList
     //layui js模板数组
     protected $layuiTemplateList = [];
 
+    /**
+     * 设置数据集中的主键字段
+     * @param string $primaryKey 主键名
+     */
     public function setPrimaryKey($primaryKey = 'id') {
         $this->primaryKey = $primaryKey;
     }
