@@ -14,6 +14,27 @@
         .layui-table-cell {
             height: 100%;
         }
+        .layui-layout-admin .layui-footer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            left: 0px;
+            flex-wrap: nowrap;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        @media all and (max-width: 375px){
+            .layui-layout-admin .layui-logo {
+                width: 120px;
+            }
+            .layui-layout-left {
+                left: 120px;
+            }
+            .layui-nav {
+                padding: 0px 12px;
+            }
+
+        }
         /*.layui-table-tool {*/
         /*    background-color: white;*/
         /*    border: none;*/
@@ -26,29 +47,31 @@
     <div class="layui-header">
         <div class="layui-logo">{:config('app.app_name')}</div>
         <!-- 头部区域（可配合layui已有的水平导航） -->
-<!--        <ul class="layui-nav layui-layout-left">-->
-<!--            <li class="layui-nav-item"><a href="">控制台</a></li>-->
-<!--            <li class="layui-nav-item"><a href="">商品管理</a></li>-->
-<!--            <li class="layui-nav-item"><a href="">用户</a></li>-->
-<!--            <li class="layui-nav-item">-->
-<!--                <a href="javascript:;">其它系统</a>-->
-<!--                <dl class="layui-nav-child">-->
-<!--                    <dd><a href="">邮件管理</a></dd>-->
-<!--                    <dd><a href="">消息管理</a></dd>-->
-<!--                    <dd><a href="">授权管理</a></dd>-->
-<!--                </dl>-->
-<!--            </li>-->
-<!--        </ul>-->
+        <ul class="layui-nav layui-layout-left">
+            <li class="layui-nav-item" id="icon_stretch">
+                <i class="layui-icon layui-icon-shrink-right" style="font-size: 1.2rem;color: #c2c2c2;"></i>
+            </li>
+            <!--            <li class="layui-nav-item"><a href="">商品管理</a></li>-->
+            <!--            <li class="layui-nav-item"><a href="">用户</a></li>-->
+            <!--            <li class="layui-nav-item">-->
+            <!--                <a href="javascript:;">其它系统</a>-->
+            <!--                <dl class="layui-nav-child">-->
+            <!--                    <dd><a href="">邮件管理</a></dd>-->
+            <!--                    <dd><a href="">消息管理</a></dd>-->
+            <!--                    <dd><a href="">授权管理</a></dd>-->
+            <!--                </dl>-->
+            <!--            </li>-->
+        </ul>
         <ul class="layui-nav layui-layout-right" lay-filter="user">
             <li class="layui-nav-item">
                 <a href="javascript:;">
-<!--                    <img src="http://t.cn/RCzsdCq" class="layui-nav-img">-->
+                    <!--                    <img src="http://t.cn/RCzsdCq" class="layui-nav-img">-->
                     {:request()->user['username']}
                 </a>
-<!--                <dl class="layui-nav-child">-->
-<!--                    <dd><a href="">基本资料</a></dd>-->
-<!--                    <dd><a href="">安全设置</a></dd>-->
-<!--                </dl>-->
+                <!--                <dl class="layui-nav-child">-->
+                <!--                    <dd><a href="">基本资料</a></dd>-->
+                <!--                    <dd><a href="">安全设置</a></dd>-->
+                <!--                </dl>-->
             </li>
             <li class="layui-nav-item">
                 <a href="javascript:;" id="logout">
@@ -140,7 +163,38 @@
             }
         }
 
+        $('#icon_stretch').on('click',function () {
+            $('.layui-side.layui-bg-black').toggle('slow',function () {
+                if ($('.layui-side.layui-bg-black').css('display') === 'none'){
+                    $('.layui-body').css('left','0px');
+                    $('.layui-layout-admin .layui-footer').css('left','0px');
+                } else {
+                    $('.layui-body').css('left','200px');
+                    $('.layui-layout-admin .layui-footer').css('left','200px');
+                }
+            });
 
+        });
+        if (isMobile()){
+            $('.layui-side.layui-bg-black').hide('slow',function () {
+                $('.layui-body').css('left','0px');
+            });
+        }
+
+        /**
+         * 判断UA是否是移动端
+         * @returns {boolean}
+         */
+        function isMobile() {
+            let uaList = ['micromessenger','Android','iPhone','iPad','iPod','Mobile'];
+            let ua = navigator.userAgent;
+            for (let i = 0; i < uaList.length; i++) {
+                if (ua.indexOf(uaList[i]) !== -1){
+                    return true
+                }
+            }
+            return false;
+        }
     });
 
 </script>
