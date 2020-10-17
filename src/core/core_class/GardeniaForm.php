@@ -11,6 +11,10 @@ namespace gardenia_admin\src\core\core_class;
 use think\Exception;
 use think\facade\View;
 
+/**
+ * Class GardeniaForm 表单生成类
+ * @package gardenia_admin\src\core\core_class
+ */
 class GardeniaForm
 {
     //成功的状态码
@@ -29,13 +33,13 @@ class GardeniaForm
     protected $formWholeStyle = [];
 
     /**
-     * @param string $styleType:风格类型 'gardenia','normal'
-     * @param string $type:类型
-     * @param $field
-     * @param $title
-     * @param null $option
-     * @param null $attrList
-     *  @param false $enableColon:开启标题后加冒号
+     * 添加表单项
+     * @param string $styleType 风格类型 'gardenia','normal'
+     * @param string $type 元素类型，若styleType为'gardenia'，则为以下之一：hidden、text、number、password、select、checkbox、switch、radio、textarea、tree，若是styleType为normal，则为普通html标签名
+     * @param string $field 属性名
+     * @param string $title 元素标题
+     * @param array $option 元素的选项数组（供select的option使用），用法是 [value => title]
+     * @param array $attrList 元素的属性数组，同html元素的属性列表
      * @return $this
      * @throws Exception
      */
@@ -59,6 +63,13 @@ class GardeniaForm
 
         return $this;
     }
+
+    /**
+     * 设置表单的整体风格，目前仅支持给表单项添加冒号 ['colon' => true]
+     * @param array $data
+     * @return $this
+     * @throws Exception
+     */
     public function setFormWholeStyle($data = []) {
         if (gettype($data) !== 'array') {
             throw new Exception('setFormWholeStyle方法的参数只支持数组类型',self::CODE_FAIL);
@@ -66,6 +77,17 @@ class GardeniaForm
         $this->formWholeStyle = $data;
         return $this;
     }
+
+    /**
+     * 添加表单底部按钮
+     * @param string $styleType
+     * @param string $type
+     * @param string $field
+     * @param string $title
+     * @param array $attrList
+     * @return $this
+     * @throws Exception
+     */
     public function addBottomButton($styleType,$type,$field,$title,$attrList = null) {
         $typeList = ['submit','reset','cancel','normal'];
         if (!in_array($type,$typeList)){
@@ -85,14 +107,34 @@ class GardeniaForm
 
         return $this;
     }
+
+    /**
+     * 设置表单提交方式：GET、POST等等
+     * @param string $method
+     * @return $this
+     */
     public function setFormMethod($method) {
         $this->formMethod = $method;
         return $this;
     }
+
+    /**
+     * 设置表单提交Url
+     * @param string $url
+     * @return $this
+     */
     public function setFormUrl($url) {
         $this->formUrl = $url;
         return $this;
     }
+
+    /**
+     * 添加树形组件表单项内部的js
+     * @param string $field
+     * @param string $type
+     * @param string $content
+     * @return $this
+     */
     public function addTreeItemJs($field,$type,$content) {
         $this->treeItemJsArr[] = [
             'field' => $field,
@@ -101,6 +143,13 @@ class GardeniaForm
         ];
         return $this;
     }
+
+    /**
+     * @param string $field
+     * @param string $type
+     * @param string $content
+     * @return $this
+     */
     public function addFormJs($field,$type,$content) {
         $this->formJsArr[] = [
             'field' => $field,
@@ -109,6 +158,14 @@ class GardeniaForm
         ];
         return $this;
     }
+
+    /**
+     * 设置layui.js调用各模块成功后的回调函数内部执行的js
+     * @param string $type
+     * @param string $content
+     * @param array $paramList
+     * @return $this
+     */
     public function setInnerJs($type,$content,$paramList = []) {
 
         $this->innerJs = [
@@ -118,10 +175,21 @@ class GardeniaForm
         ];
         return $this;
     }
+
+    /**
+     * 设置表单状态，是否可提交，若为true之间挑战，否则不会跳转
+     * @param bool $status true或者false
+     * @return $this
+     */
     public function setFormStatus($status) {
         $this->formStatus = $status;
         return $this;
     }
+
+    /**
+     * 获取内部js文件的内容
+     * @return string
+     */
     protected function getInnerJsContent() {
         if (isset($this->innerJs) && $this->innerJs) {
             if ($this->innerJs['type'] === 'path'){
@@ -134,7 +202,7 @@ class GardeniaForm
     }
 
     /**
-     * 如果有设置给表单项的标题添加冒号的条件，则添加，否则不添加
+     * 给表单项添加冒号，如果有设置给表单项的标题添加冒号的条件，则添加，否则不添加
      */
     private function ItemAddColon() {
         if ($this->formWholeStyle && isset($this->formWholeStyle['colon'])){
@@ -145,6 +213,10 @@ class GardeniaForm
             }
         }
     }
+
+    /**
+     * 将相关数据加载到表单模板文件中并执行
+     */
     public function display() {
         $request = request();
         $this->formUrl === null && $this->formUrl = url('/'.$request->controller().'/'.$request->action());

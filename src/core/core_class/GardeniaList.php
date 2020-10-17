@@ -10,7 +10,10 @@ use gardenia_admin\src\core\core_class\GardeniaConstant;
 use think\Exception;
 use think\facade\Db;
 
-
+/**
+ * Class GardeniaList 构造Layui数据表格类
+ * @package gardenia_admin\src\core\core_class
+ */
 class GardeniaList
 {
 
@@ -18,6 +21,8 @@ class GardeniaList
     const CODE_SUCCESS = 10000;
     //失败的状态码
     const CODE_FAIL = 10001;
+    //元素风格类型，用于填写
+    const ELEMENT_STYLE_GARDENIA = 'gardenia';
 
     protected $tableHead = [];
     protected $data = [];
@@ -40,6 +45,14 @@ class GardeniaList
     public function setPrimaryKey($primaryKey = 'id') {
         $this->primaryKey = $primaryKey;
     }
+
+    /**
+     * Layui数据表格的基础参数
+     * @param string $attr 属性名
+     * @param mixed $value 属性值
+     * @return $this
+     * @throws \Exception
+     */
     public function setTableAttr($attr,$value) {
         if (!isset($attr) || !isset($value)) {
             throw new \Exception('调用setTableAttr方法时attr和value参数必填！',self::CODE_FAIL);
@@ -51,6 +64,15 @@ class GardeniaList
         $this->tableAttrList[$attr] = $value;
         return $this;
     }
+
+    /**
+     * 添加layui数据表格cols表头参数
+     * @param string $field 字段名
+     * @param string $title 标题名称
+     * @param array $cols cols表头其它参数
+     * @return $this
+     * @throws Exception
+     */
     public function addTableHead($field,$title,$cols = []) {
         if (gettype($cols) !== 'array') {
             throw new Exception('cols参数必须是关联数组格式',self::CODE_FAIL);
@@ -61,6 +83,13 @@ class GardeniaList
         $this->tableHead[] = $temp;
         return $this;
     }
+
+    /**
+     * 批量添加layui数据表格cols表头参数
+     * @param \string[][] $headList
+     * @return $this
+     * @throws Exception
+     */
     public function addTableHeadBatch($headList = [['field'=> 'test', 'title'=> '测试']]) {
         foreach ($headList as $item) {
             if (!isset($item['field']) || !isset($item['title'])){
@@ -72,6 +101,18 @@ class GardeniaList
         return $this;
     }
 
+    /**
+     * 添加layui数据表格操作列的按钮
+     * @param string $field 按钮的name属性，相当于html元素的name属性
+     * @param string $title 按钮标题
+     * @param string $type 按钮风格，值为gardenia或者normal，用于指定元素是gardenia预置的还是用户自己定义的，后面将改为$style
+     * @param string $btnType 按钮类型，值为增删改查 分别是create、delete、edit、read
+     * @param array $attrList 属性列表，相当于html元素的属性
+     * @param array $dataList data属性列表，相当于html元素的data属性的值
+     * @param string $ruleName 规则名称，用于权限校验时显示或者隐藏本按钮
+     * @return $this
+     * @throws Exception
+     */
     public function addColumnOperateButton($field,$title,$type,$btnType,$attrList = [],$dataList = [],$ruleName = '') {
         if (!$this->tableHead){
             throw new Exception('请先调用addListHead方法',self::CODE_FAIL);
@@ -103,6 +144,13 @@ class GardeniaList
         return $this;
     }
 
+    /**
+     * 设置layui数据表格的toolbar属性
+     * @param string $element 元素选择器
+     * @param string $type 类型：text或path，其中path是js文件的路径
+     * @param string $content 内容
+     * @return $this
+     */
     public function setHeadToolbox($element = '#toolbarDemo',$type = 'text',$content = ""){
 
         $this->headToolbox = [
@@ -129,6 +177,14 @@ class GardeniaList
         $this->extraJS[] = ['type' => $type , 'content' => $content ];
         return $this;
     }
+
+    /**
+     * 在layui完成加载各模块的后的回调函数离执行的js
+     * @param string $type text或path，其中path是js文件的路径
+     * @param string $content 内容
+     * @return $this
+     * @throws \Exception
+     */
     public function addExtraLayuiJS($type,$content) {
         if ($type === null || $content === null){
             throw new \Exception('调用addExtraLayuiJS方法时，type和content参数必填',self::CODE_FAIL);
@@ -137,6 +193,16 @@ class GardeniaList
         $this->extraLayuiJS[] = ['type' => $type , 'content' => $content ];
         return $this;
     }
+
+    /**
+     * 添加表格顶部按钮，用法与addColumnOperateButton类似
+     * @param string $type 按钮风格，值为'gardenia','normal'
+     * @param string $title 按钮标题
+     * @param string $btnType 按钮类型，值为'create','delete'
+     * @param array $attrList 属性列表
+     * @return $this
+     * @throws \Exception
+     */
     public function addTopOperateButton($type,$title,$btnType = null,$attrList = []) {
         if ($title === null || $type === null){
             throw new \Exception('调用addTopOperateButton方法时，title,type参数必填',self::CODE_FAIL);
@@ -180,6 +246,11 @@ class GardeniaList
         return $this;
     }
 
+    /**
+     * 加载指定的模板文件
+     * @param string $templatePath 模板路径
+     * @param array $var 同tp的view助手函数的var参数用法一样
+     */
     public function view($templatePath = '',$var = []) {
         $templatePath = $templatePath ? $templatePath : app_path().config('view.view_dir_name')
             .'/'.config('route.default_controller').'/'.config('route.default_action').
@@ -190,6 +261,10 @@ class GardeniaList
             'templateContent'=> view($templatePath,$var)->getContent()
         ])->send();
     }
+
+    /**
+     * 将GardeniaList类的数据传到指定模板，并渲染该模板
+     */
     public function display() {
         //处理一些默认值
         if (!isset($this->tableAttrList['height'])) {
