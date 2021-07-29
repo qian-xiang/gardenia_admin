@@ -58,22 +58,28 @@
                                     //已确认
                                     layer.close(index);
                                     $.ajax({
-                                        url: "{:url('/'.request()->controller().'/delete')}?id=" + deleteData,
+                                        url: "{:url('/'.request()->controller().'/delete')}",
                                         method: 'POST',
-                                        data: {},
+                                        data: {
+                                            id: deleteData,
+                                        },
                                         success: function (e) {
                                             if (e.code) {
                                                 layer.alert(e.msg);
                                                 e.redirectUrl && (location.href = e.redirectUrl);
                                                 return ;
                                             }
-
                                             layer.alert('删除成功！');
-                                            e.redirectUrl ? (location.href = e.redirectUrl) : table.reload('data-table');
+                                            if (e.redirectUrl) {
+                                                location.href = e.redirectUrl;
+                                            } else {
+                                                table.reload('data-table');
+                                            }
+
                                         },
                                         error: function (e) {
                                             console.log(e);
-                                            layer.alert('网络异常，请求失败');
+                                            layer.alert('请求时发生错误');
                                         }
                                     })
                                 })
@@ -121,10 +127,12 @@
                 case '{:gardenia_admin\\src\\core\\core_class\\GardeniaConstant::GARDENIA_PREFIX}delete':
                     layer.confirm('你确定要删除ID：'+ obj.data[primaryKey] + '的记录么？',null,function (index) {
                         $.ajax({
-                            url: '{:url("/".request()->controller()."/delete")}?id=' + obj.data[primaryKey],
+                            url: '{:url("/".request()->controller()."/delete")}',
                             method: 'POST',
                             dataType: 'json',
-                            data: {},
+                            data: {
+                                id: obj.data[primaryKey],
+                            },
                             success: function (res) {
                                 console.log(res);
                                 if (res.code !== 0){
@@ -133,7 +141,10 @@
                                 layer.msg('删除成功！');
                                 if (res.redirectUrl){
                                     location.href = res.redirectUrl;
+                                } else {
+                                    table.reload('data-table');
                                 }
+
                             }
                         })
                         layer.close(index);

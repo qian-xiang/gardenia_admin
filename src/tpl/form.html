@@ -106,6 +106,7 @@
                             <label class="layui-form-label">{$item.title}</label>
                             <div class="layui-input-block">
                                 <div id="{$item.field}"></div>
+
                                 {php}
                                     $treeList[] = ['elem'=> $item['field'],'id'=> $item['field'],'data'=> json_encode($item['option'],JSON_UNESCAPED_UNICODE)];
                                 {/php}
@@ -148,45 +149,58 @@
 
 </form>
 </div>
+
+
 <script>
     let moduleList = ['form','jquery'];
     {if isset($treeList) && $treeList}
-        moduleList.push('tree');
+    moduleList.push('tree');
     {/if}
-    layui.use(moduleList, function(){
-        var form = layui.form;
-        var $ = layui.$;
-        {volist name="formJsArr" id="formJs"}
+        layui.use(moduleList, function(){
+            var form = layui.form;
+            var $ = layui.$;
+            {volist name="formJsArr" id="formJs"}
             {if $formJs['type'] === 'path'}
-                {:view($formJs.content)->getContent()}
+            {:view($formJs.content)->getContent()}
             {else /}
                 {:htmlspecialchars_decode($formJs.content)}
-            {/if}
-        {/volist}
-
-        {if isset($treeList) && $treeList}
-            {volist name="treeList" id="item"}
-                let tree_{$item.elem} = layui.tree;
-                //渲染
-                tree_{$item.elem}.render({
-                    elem: '#{$item.elem}'
-                    ,data: {:htmlspecialchars_decode($item.data)}
-                    ,id: "{$item.id}"
-                    ,showCheckbox: true
-                });
-            {/volist}
-
-            {volist name="treeItemJsArr" id="treeItemJs"}
-                {if $treeItemJs['type'] === 'path'}
-                    {:view($treeItemJs.content)->getContent()}
-                {else /}
-                    {:htmlspecialchars_decode($treeItemJs.content)}
                 {/if}
-            {/volist}
-        {/if}
+                    {/volist}
 
-            {if isset($innerJs) && $innerJs}
-                {:htmlspecialchars_decode($innerJs)}
-            {/if}
-    });
+                        {if isset($treeList) && $treeList}
+                        {volist name="treeList" id="item"}
+                        const tree_{$item.elem} = layui.tree;
+                        //渲染
+                        $('div#{$item.id}').after('<input type="hidden" name="{$item.id}" value=\'{:htmlspecialchars_decode($item.data)}\'>')
+
+                        tree_{$item.elem}.render({
+                        id: "{$item.id}"
+                        ,elem: '#{$item.elem}'
+                        ,data: {:htmlspecialchars_decode($item.data)}
+                        ,showCheckbox: true,
+                        oncheck: function(obj){
+                            try {
+                                var checkedData = tree_{$item.elem}.getChecked("{$item.id}");
+                                console.log('选中的数据',checkedData);
+                                $('input[name="{$item.id}"]').val(JSON.stringify(checkedData));
+                            } catch (e) {
+                                console.log('报错了',e)
+                            }
+                        }
+                    });
+                        {/volist}
+
+                            {volist name="treeItemJsArr" id="treeItemJs"}
+                            {if $treeItemJs['type'] === 'path'}
+                            {:view($treeItemJs.content)->getContent()}
+                            {else /}
+                                {:htmlspecialchars_decode($treeItemJs.content)}
+                                {/if}
+                                    {/volist}
+                                        {/if}
+
+                                            {if isset($innerJs) && $innerJs}
+                                            {:htmlspecialchars_decode($innerJs)}
+                                            {/if}
+                                            });
 </script>

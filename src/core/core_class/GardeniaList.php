@@ -66,6 +66,50 @@ class GardeniaList
     }
 
     /**
+     * 添加layui数据表格操作列的按钮
+     * @param string $field 按钮的name属性，相当于html元素的name属性
+     * @param string $title 按钮标题
+     * @param string $type 按钮风格，值为gardenia或者normal，用于指定元素是gardenia预置的还是用户自己定义的，后面将改为$style
+     * @param string $btnType 按钮类型，值为增删改查 分别是create、delete、edit、read
+     * @param string $ruleName 规则名称，用于权限校验时显示或者隐藏本按钮
+     * @param array $attrList 属性列表，相当于html元素的属性
+     * @param array $dataList data属性列表，相当于html元素的data属性的值
+     * @return $this
+     * @throws Exception
+     */
+    public function addColumnOperateButton($field,$title,$type,$btnType,$ruleName = '',$attrList = [],$dataList = []) {
+        $request = request();
+        if ($ruleName) {
+            if ($request->admin_info->authGroup->type !== GardeniaConstant::GROUP_TYPE_SUPER_ADMIN){
+                if (!in_array($ruleName,$request->admin_info->access_list)){
+                    return $this;
+                }
+            }
+        }
+        if (!$this->tableHead){
+            throw new Exception('请先调用addListHead方法',self::CODE_FAIL);
+        }
+        foreach ($this->tableHead as $item) {
+            if ($item['field'] === $field) {
+                if (isset($item['toolbar'])) {
+                    throw new Exception('addColumnOperateButton方法和addListHead方法中设置toolbar属性不可同时存在，请不要设置toolbar',self::CODE_FAIL);
+                };
+            }
+        }
+
+
+        $this->colOperateBtnList[$field][] = [
+            'field' => $field,
+            'title' => $title,
+            'type' => $type,
+            'btnType' => $btnType,
+            'attrList' => $attrList,
+            'dataList' => $dataList,
+        ];
+        return $this;
+    }
+
+    /**
      * 添加layui数据表格cols表头参数
      * @param string $field 字段名
      * @param string $title 标题名称
@@ -98,49 +142,6 @@ class GardeniaList
         }
 
         $this->tableHead = $headList;
-        return $this;
-    }
-
-    /**
-     * 添加layui数据表格操作列的按钮
-     * @param string $field 按钮的name属性，相当于html元素的name属性
-     * @param string $title 按钮标题
-     * @param string $type 按钮风格，值为gardenia或者normal，用于指定元素是gardenia预置的还是用户自己定义的，后面将改为$style
-     * @param string $btnType 按钮类型，值为增删改查 分别是create、delete、edit、read
-     * @param array $attrList 属性列表，相当于html元素的属性
-     * @param array $dataList data属性列表，相当于html元素的data属性的值
-     * @param string $ruleName 规则名称，用于权限校验时显示或者隐藏本按钮
-     * @return $this
-     * @throws Exception
-     */
-    public function addColumnOperateButton($field,$title,$type,$btnType,$attrList = [],$dataList = [],$ruleName = '') {
-        if (!$this->tableHead){
-            throw new Exception('请先调用addListHead方法',self::CODE_FAIL);
-        }
-        $request = request();
-        foreach ($this->tableHead as $item) {
-            if ($item['field'] === $field) {
-                if (isset($item['toolbar'])) {
-                    throw new Exception('addColumnOperateButton方法和addListHead方法中设置toolbar属性不可同时存在，请不要设置toolbar',self::CODE_FAIL);
-                };
-            }
-        }
-        if ($ruleName) {
-            if ($request->user['admin_type'] !== GardeniaConstant::GROUP_TYPE_SUPER_ADMIN){
-                if (!in_array($ruleName,$request->user['access_list'])){
-                    $attrList['style'] = 'display: none';
-                }
-            }
-        }
-
-        $this->colOperateBtnList[$field][] = [
-            'field' => $field,
-            'title' => $title,
-            'type' => $type,
-            'btnType' => $btnType,
-            'attrList' => $attrList,
-            'dataList' => $dataList,
-        ];
         return $this;
     }
 
@@ -296,13 +297,13 @@ class GardeniaList
 
                             switch ($item['btnType']) {
                                 case 'read':
-                                    $temp = $temp.'<button name="'.GardeniaConstant::GARDENIA_PREFIX.'read" lay-event="'.GardeniaConstant::GARDENIA_PREFIX.'read" class="layui-btn layui-btn-warm layui-bg-green layui-btn-sm" '.$attrStr.' '.$dataStr.'>'.$item['title'].'</button>';
+                                    $temp = $temp.'<button name="'.GardeniaConstant::GARDENIA_PREFIX.'_read" lay-event="'.GardeniaConstant::GARDENIA_PREFIX.'read" class="layui-btn layui-btn-warm layui-bg-green layui-btn-sm" '.$attrStr.' '.$dataStr.'>'.$item['title'].'</button>';
                                     break;
                                 case 'edit':
-                                    $temp = $temp.'<button name="'.GardeniaConstant::GARDENIA_PREFIX.'edit" lay-event="'.GardeniaConstant::GARDENIA_PREFIX.'edit" class="layui-btn layui-btn-warm layui-bg-blue layui-btn-sm" '.$attrStr.' '.$dataStr.'>'.$item['title'].'</button>';
+                                    $temp = $temp.'<button name="'.GardeniaConstant::GARDENIA_PREFIX.'_edit" lay-event="'.GardeniaConstant::GARDENIA_PREFIX.'edit" class="layui-btn layui-btn-warm layui-bg-blue layui-btn-sm" '.$attrStr.' '.$dataStr.'>'.$item['title'].'</button>';
                                     break;
                                 case 'delete':
-                                    $temp = $temp.'<button name="'.GardeniaConstant::GARDENIA_PREFIX.'delete" lay-event="'.GardeniaConstant::GARDENIA_PREFIX.'delete" class="layui-btn layui-btn-warm layui-bg-red layui-btn-sm" '.$attrStr.' '.$dataStr.'>'.$item['title'].'</button>';
+                                    $temp = $temp.'<button name="'.GardeniaConstant::GARDENIA_PREFIX.'_delete" lay-event="'.GardeniaConstant::GARDENIA_PREFIX.'delete" class="layui-btn layui-btn-warm layui-bg-red layui-btn-sm" '.$attrStr.' '.$dataStr.'>'.$item['title'].'</button>';
                                     break;
                                 default:
                                     new Exception('addColumnOperateButton不支持'.$item['btnType'].'按钮类型',self::CODE_FAIL);

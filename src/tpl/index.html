@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <title>{:config('app.app_name')}</title>
-    <link rel="stylesheet" href="__STATIC__/layui-v2.5.6/layui/css/layui.css">
-    <script src="__STATIC__/layui-v2.5.6/layui/layui.js"></script>
+    <link rel="stylesheet" href="//unpkg.com/layui@2.6.8/dist/css/layui.css">
+    <script src="//unpkg.com/layui@2.6.8/dist/layui.js"></script>
     <style>
         .layui-body {
             overflow-x: scroll;
@@ -51,36 +51,46 @@
         <div class="layui-logo">{:config('app.app_name')}</div>
         <!-- 头部区域（可配合layui已有的水平导航） -->
         <ul class="layui-nav layui-layout-left">
-            <li class="layui-nav-item" id="icon_stretch">
-                <i class="layui-icon layui-icon-shrink-right" style="font-size: 1.2rem;color: #c2c2c2;"></i>
-            </li>
-            <!--            <li class="layui-nav-item"><a href="">商品管理</a></li>-->
-            <!--            <li class="layui-nav-item"><a href="">用户</a></li>-->
-            <!--            <li class="layui-nav-item">-->
-            <!--                <a href="javascript:;">其它系统</a>-->
-            <!--                <dl class="layui-nav-child">-->
-            <!--                    <dd><a href="">邮件管理</a></dd>-->
-            <!--                    <dd><a href="">消息管理</a></dd>-->
-            <!--                    <dd><a href="">授权管理</a></dd>-->
-            <!--                </dl>-->
-            <!--            </li>-->
+        {php}
+            $___gardeniaLayout___ = ${\gardenia_admin\src\core\core_class\GardeniaConstant::GARDENIA_PREFIX.'Layout'};
+            $___gardeniaLeftType___ = \gardenia_admin\src\core\core_class\GardeniaConstant::TEMPLATE_TYPE_PATH;
+            $___gardeniaRightType___ = \gardenia_admin\src\core\core_class\GardeniaConstant::TEMPLATE_TYPE_PATH;
+        {/php}
+
+        {if $___gardeniaLayout___['left']['content'] === null }
+        <li class="layui-nav-item" id="icon_stretch">
+            <i class="layui-icon layui-icon-shrink-right" style="font-size: 1.2rem;color: #c2c2c2;"></i>
+        </li>
+        {elseif $___gardeniaLayout___['left']['type'] === $___gardeniaLeftType___ /}
+        {:view($___gardeniaLayout___['left']['content'],$___gardeniaLayout___['left']['vars'])}
+        {else /}
+        {:\think\\facade\\View::display($___gardeniaLayout___['left']['content'],$___gardeniaLayout___['left']['vars'])}
+        {/if}
         </ul>
+
         <ul class="layui-nav layui-layout-right" lay-filter="user">
+            {if $___gardeniaLayout___['right']['content'] === null }
             <li class="layui-nav-item">
                 <a href="javascript:;">
-                    <!--                    <img src="http://t.cn/RCzsdCq" class="layui-nav-img">-->
-                    {:request()->user['username']}
+<!--                    <img src="/static/image/admin/logo.jpg" class="layui-nav-img">-->
+                    {:request()->admin_info->admin->username}&nbsp;&nbsp;
                 </a>
-                <!--                <dl class="layui-nav-child">-->
-                <!--                    <dd><a href="">基本资料</a></dd>-->
-                <!--                    <dd><a href="">安全设置</a></dd>-->
-                <!--                </dl>-->
+                <dl class="layui-nav-child">
+                    <dd><a href="javascript:void(0)" id="logout">退出</a></dd>
+                    <!--                                    <dd><a href="">安全设置</a></dd>-->
+                </dl>
             </li>
-            <li class="layui-nav-item">
-                <a href="javascript:;" id="logout">
-                    退出
-                </a>
-            </li>
+            <!--            <li class="layui-nav-item">-->
+            <!--                <a href="javascript:;" id="logout">-->
+            <!--                    退出-->
+            <!--                </a>-->
+            <!--            </li>-->
+            {elseif $___gardeniaLayout___['right']['type'] === $___gardeniaLeftType___ /}
+            {:view($___gardeniaLayout___['right']['content'],$___gardeniaLayout___['right']['vars'])}
+            {else /}
+            {:\think\\facade\\View::display($___gardeniaLayout___['right']['content'],$___gardeniaLayout___['right']['vars'])}
+            {/if}
+
         </ul>
     </div>
 
@@ -109,11 +119,11 @@
 <script>
     layui.use(['element','jquery','layer'], function(){
         var element = layui.element;
-        let $ = layui.jquery;
-        let data = {:htmlspecialchars_decode(json_encode($asideMenuList,JSON_UNESCAPED_UNICODE))};
+        var $ = layui.jquery;
+        var data = {:htmlspecialchars_decode(json_encode($asideMenuList,JSON_UNESCAPED_UNICODE))};
         renderNavTree(data,$('.layui-nav-tree'));
-        let c = $('.layui-nav-itemed');
-        let parentNode = c.parent('dl').parent('dd');
+        var c = $('.layui-nav-itemed');
+        var parentNode = c.parent('dl').parent('dd');
         if(parentNode.length){
             parentNode.addClass('layui-nav-itemed');
             // c.removeClass('layui-nav-itemed');
@@ -143,11 +153,11 @@
 
 
         function renderNavTree(json, parent) {
-            for (let i in json) {
+            for (var i in json) {
 
-                let className = "layui-nav-item sideNav";
-                let dd = $('<dd class="'+ className +'"></dd>');
-                let menuUrl = '/{:app(\'http\')->getName()}.php' + json[i].field;
+                var className = "layui-nav-item sideNav";
+                var dd = $('<dd class="'+ className +'"></dd>');
+                var menuUrl = '/{:app(\'http\')->getName()}.php' + json[i].field;
                 if (json[i].active) {
                     dd.addClass('layui-nav-itemed');
                 }
@@ -155,7 +165,7 @@
                 //如果检测有子节点，则进行遍历
                 if (json[i].children && json[i].children.length > 0) {
                     // json[i].active && dd.addClass('layui-nav-itemed');
-                    $(dd).append('<a href="javascript: void(0);" data-href="'+menuUrl+'">'+json[i].title+'<span class="layui-nav-more"></span></a>');
+                    $(dd).append('<a href="javascript: void(0);" data-href="'+menuUrl+'">'+json[i].title+'<i class="layui-icon layui-icon-down layui-nav-more"></i></a>');
                     $(dd).append('<dl class="layui-nav-child sideNav"></dl>').appendTo(parent);
                     renderNavTree(json[i].children, $(dd).children().eq(1));
                 }
@@ -189,8 +199,8 @@
          * @returns {boolean}
          */
         function isMobile() {
-            let uaList = ['micromessenger','Android','iPhone','iPad','iPod','Mobile'];
-            let ua = navigator.userAgent;
+            var uaList = ['micromessenger','Android','iPhone','iPad','iPod','Mobile'];
+            var ua = navigator.userAgent;
             for (let i = 0; i < uaList.length; i++) {
                 if (ua.indexOf(uaList[i]) !== -1){
                     return true

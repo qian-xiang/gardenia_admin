@@ -12,7 +12,9 @@ class GardeniaConstant
     //风格类型：gardenia
     const STYLE_TYPE_GARDENIA = 'gardenia';
     //Gardenia官方的命名前缀
-    const GARDENIA_PREFIX = 'gardenia_';
+    const GARDENIA_PREFIX = 'gardenia';
     //超级管理
     const GROUP_TYPE_SUPER_ADMIN = 0;
+    const TEMPLATE_TYPE_PATH = 'path';
+    const TEMPLATE_TYPE_CONTENT = 'content';
 }
